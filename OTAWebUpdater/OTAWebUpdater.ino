@@ -5,10 +5,10 @@
 #include <Update.h>
 
 const char* host = "esp32";
-const char* ssid = "xxx";
-const char* password = "xxxx";
+const char* ssid = "Maria-2.4";
+const char* password = "Maria_Gold";
 
-WebServer server(80);
+WebServer updateServer(80);
 
 /*
  * Login page
@@ -127,21 +127,21 @@ void setup(void) {
   }
   Serial.println("mDNS responder started");
   /*return index page which is stored in serverIndex */
-  server.on("/", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", loginIndex);
+  updateServer.on("/", HTTP_GET, []() {
+    updateServer.sendHeader("Connection", "close");
+    updateServer.send(200, "text/html", loginIndex);
   });
-  server.on("/serverIndex", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+  updateServer.on("/serverIndex", HTTP_GET, []() {
+    updateServer.sendHeader("Connection", "close");
+    updateServer.send(200, "text/html", serverIndex);
   });
   /*handling uploading firmware file */
-  server.on("/update", HTTP_POST, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+  updateServer.on("/update", HTTP_POST, []() {
+    updateServer.sendHeader("Connection", "close");
+    updateServer.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
     ESP.restart();
   }, []() {
-    HTTPUpload& upload = server.upload();
+    HTTPUpload& upload = updateServer.upload();
     if (upload.status == UPLOAD_FILE_START) {
       Serial.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
@@ -160,10 +160,10 @@ void setup(void) {
       }
     }
   });
-  server.begin();
+  updateServer.begin();
 }
 
 void loop(void) {
-  server.handleClient();
+  updateServer.handleClient();
   delay(1);
 }
