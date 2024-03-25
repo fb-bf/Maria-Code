@@ -11,6 +11,11 @@
 #include "SparkFun_TCA9534.h"
 #include <ArduinoJson.h>
 #include <StreamUtils.h>
+// REMOTE UPLOAD HEADER
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+///////////////////////
 
 //#include <Adafruit_PWMServoDriver.h>
 //Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x40);
@@ -812,6 +817,37 @@ void setup() {
   Serial.print("[NEW] ESP32 Board MAC Address:  ");
   Serial.println(WiFi.macAddress());
  
+//REMOTE UPLOAD
+  ArduinoOTA
+      .onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH)
+          type = "sketch";
+        else // U_SPIFFS
+          type = "filesystem";
+
+        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+        Serial.println("Start updating " + type);
+      })
+      .onEnd([]() {
+        Serial.println("\nEnd");
+      })
+      .onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      })
+      .onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      });
+
+    ArduinoOTA.begin();
+  /////
+
+
   // ESP NOW sets the Mac address to 01 so our remote limit switch can talk to this
   
   
@@ -1037,7 +1073,9 @@ void DisplayOled(){
 }
 
 void loop() {
-  
+  //REMOTE UPLOAD
+  ArduinoOTA.handle();
+  //////
   if(New_Message == 1) HandleLimitSwitches(); // we've seen somthing from one of the remote limit switches
   if (interrupt1Counter > 0) {
     portENTER_CRITICAL(&timer1Mux);

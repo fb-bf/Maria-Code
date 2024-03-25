@@ -13,6 +13,13 @@
 //#include <Adafruit_PWMServoDriver.h>
 //Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x40);
 #include "DFRobot_GP8403.h"
+
+// REMOTE UPLOAD HEADER
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+///////////////////////
+
 DFRobot_GP8403 dac1(&Wire,0x5D);
 DFRobot_GP8403 dac2(&Wire,0x5E);
 DFRobot_GP8403 dac3(&Wire,0x5F);
@@ -689,11 +696,11 @@ void Limitswitchstop(){
   Serial.println("A Limit switch has triggered");
 }  
 void setup() {
-Serial.begin(115200);
+  Serial.begin(115200);
 
 
-WiFi.mode(WIFI_STA);
-Serial.print("Setting AP (Access Point)…");
+  WiFi.mode(WIFI_STA);
+  Serial.print("Setting AP (Access Point)…");
   // Remove the password parameter, if you want the AP (Access Point) to be open
   WiFi.softAP(ssid);
   esp_wifi_set_channel( 11, WIFI_SECOND_CHAN_NONE);
@@ -703,6 +710,37 @@ Serial.print("Setting AP (Access Point)…");
   server.begin();
   server.setNoDelay(true);
   
+  //REMOTE UPLOAD
+  ArduinoOTA
+      .onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH)
+          type = "sketch";
+        else // U_SPIFFS
+          type = "filesystem";
+
+        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+        Serial.println("Start updating " + type);
+      })
+      .onEnd([]() {
+        Serial.println("\nEnd");
+      })
+      .onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      })
+      .onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      });
+
+    ArduinoOTA.begin();
+  /////
+
+
   esp_wifi_set_mac(WIFI_IF_STA, &newMACAddress[0]);
   Serial.print("[NEW] ESP32 Board MAC Address:  ");
   Serial.println(WiFi.macAddress());
@@ -923,6 +961,9 @@ void DisplayOled(){
 }  
 
 void loop() {
+  //REMOTE UPLOAD
+  ArduinoOTA.handle();
+  //////
   int Yloc;
   //Serial.println(interruptbool1);
   if(New_Message == 1) HandleLimitSwitches(); // we've seen somthing from one of the remote limit switches
