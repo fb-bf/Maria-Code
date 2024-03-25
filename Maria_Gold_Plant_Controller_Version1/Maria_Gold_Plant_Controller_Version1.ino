@@ -334,6 +334,7 @@ void setup() {
   esp_now_register_send_cb(OnDataSent); // register the callback function
   // register peer
   esp_now_peer_info_t peerInfo;
+  memset(&peerInfo, 0, sizeof(peerInfo)); //This is added for use with newest arduino IDE
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
   // register first peer
