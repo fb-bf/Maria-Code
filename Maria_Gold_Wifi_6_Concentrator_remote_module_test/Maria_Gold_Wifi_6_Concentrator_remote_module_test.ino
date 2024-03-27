@@ -37,6 +37,11 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+// REMOTE UPLOAD HEADER
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+///////////////////////
 //#include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
 #define i2c_Address 0x3c //initialize with the I2C addr 0x3C Typically eBay OLED's
@@ -197,7 +202,34 @@ void setup() {
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
-  
+  ArduinoOTA 
+      .onStart([]() { 
+        String type; 
+        if (ArduinoOTA.getCommand() == U_FLASH) 
+          type = "sketch"; 
+        else // U_SPIFFS 
+          type = "filesystem"; 
+ 
+        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end() 
+        Serial.println("Start updating " + type); 
+      }) 
+      .onEnd([]() { 
+        Serial.println("\nEnd"); 
+      }) 
+      .onProgress([](unsigned int progress, unsigned int total) { 
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100))); 
+      }) 
+      .onError([](ota_error_t error) { 
+        Serial.printf("Error[%u]: ", error); 
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed"); 
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed"); 
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed"); 
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed"); 
+        else if (error == OTA_END_ERROR) Serial.println("End Failed"); 
+      }); 
+ 
+    ArduinoOTA.begin(); 
+  /////
   server.begin();
   //set all relays to off and ball valves to 15% flow
   Data_1.valve_relay_states = 0;
@@ -250,6 +282,9 @@ void loop() {
   // Since we refresh every 5 seconds, check to see if this is 
   // a real change from the controller
   //First time through loop this will try to talk to all remote modules
+  //REMOTE UPLOAD 
+  ArduinoOTA.handle(); 
+  //////
  if (New_Event == 1){
     New_Event = 0;
     Serial.println("Saw New_Event");
@@ -278,7 +313,7 @@ void Deal_With_client() {
       currentTime = millis();
       if (client.available()) {             // if there's bytes to read from the client,
         char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out the serial monitor
+        //Serial.write(c);                    // print it out the serial monitor
         header += c;
         if (c == '\n') {                    // if the byte is a newline character
           // if the current line is blank, you got two newline characters in a row.
