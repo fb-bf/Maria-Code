@@ -830,12 +830,12 @@ void setup() {
   //To use the same gain terms for each of the control loops we should multiply
   //the original saved gain values by 5000/2048 = 2.44;
   //We'll do that here so we're not doing it everytime we go through the control loops
-
+/*
   BoomG = 2.44*BoomG;
   TrolleyG = 2.44*TrolleyG;
   DragflowG = 2.44*DragflowG;
   HoseReelG = 2.44*HoseReelG;
-  HoseGuideG = 2.44*HoseGuideG;
+  HoseGuideG = 2.44*HoseGuideG;*/
 
   while(dac1.begin()!=0){
     Serial.println("init error");
@@ -891,7 +891,7 @@ void setup() {
   boomencoder.attachFullQuad(17, 16);
   trolleyencoder.attachSingleEdge(35, 34);
   dragflowencoder.attachSingleEdge(33, 32);
-  hosereelencoder.attachFullQuad(26, 25);
+  hosereelencoder.attachHalfQuad(26, 25);
   hoseguideencoder.attachSingleEdge(14, 13);  
   // set starting count value after attaching
   boomencoder.setFilter(255);
