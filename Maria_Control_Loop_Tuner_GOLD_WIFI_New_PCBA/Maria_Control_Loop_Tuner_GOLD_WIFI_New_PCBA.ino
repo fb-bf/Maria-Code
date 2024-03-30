@@ -76,7 +76,7 @@ uint16_t looptimer = 2000; //This is a divider used to set loop interupt time
 // *******************
 
 int32_t boomPosition = 0;
-int boomVelocity = 0;
+int32_t boomVelocity = 0;
 int32_t boomLastPosition = 0;
 int boomServoOutput = 0;
 int LastboomServoOutput = 0;
@@ -94,11 +94,11 @@ int BoomClipLeft = -2047;
 int Boomdb = 0;
 
 int32_t trolleyPosition = 0;
-int trolleyVelocity = 0;
-int trolleyLastPosition = 0;
+int32_t trolleyVelocity = 0;
+int32_t trolleyLastPosition = 0;
 int trolleyServoOutput = 0;
 int LasttrolleyServoOutput = 0;
-int maxtrolleylocation = 90;
+int32_t maxtrolleylocation = 90;
 int32_t trolleyCurrentPosition = 0;
 int32_t TrolleyError = 0;
 float Trencoderperft = 7639.; // Overwritten when Saved variables are read 
@@ -112,13 +112,13 @@ int Trolleydb = 0;
 int goToHere = 3000;
 
 int32_t hoseReelPosition = 0;
-int hoseReelVelocity = 0;
+int32_t hoseReelVelocity = 0;
 int movingOutVel = 75;  // This is about .5 ft/sec in encodercounts/sec
 int movingInVel = -10; // Used to chech if the trolley or dredge is moving in
 int hoseReelStall = -5; // checks to see if the hosereel has stalled pulling in the pipe
 // The above are used to check if the hose reel is controlling the pipe correctly
 
-int hoseReelLastPosition = 0;
+int32_t hoseReelLastPosition = 0;
 int hoseReelServoOutput = 0;
 int LasthoseReelServoOutput = 0;
 int32_t hoseReelCurrentPosition = 0;
@@ -136,8 +136,8 @@ int HoseReelClipIn = -2047;
 int HoseReeldb = 0;
 
 int32_t hoseGuidePosition = 0;
-int hoseGuideVelocity = 0;
-int hoseGuideLastPosition = 0;
+int32_t hoseGuideVelocity = 0;
+int32_t hoseGuideLastPosition = 0;
 int hoseGuideServoOutput = 0;
 int LasthoseGuideServoOutput = 0;
 int32_t hoseGuideCurrentPosition = 0;
@@ -153,8 +153,8 @@ int HoseGuidedb = 0;
 
 int32_t dragflowPosition = 0;
 float dragflowheight = 0;
-int dragflowVelocity = 0;
-int dragflowLastPosition = 0;
+int32_t dragflowVelocity = 0;
+int32_t dragflowLastPosition = 0;
 int dragflowServoOutput = 0;
 int LastdragflowServoOutput = 0;
 int32_t dragflowCurrentPosition = 0;
@@ -278,14 +278,19 @@ void ControlLoop() {
     DragflowControl();
     HoseReelControl();
     HoseGuideControl();
-    HoseReelOverride(); // This checks to see if the hose reel is keeping the proper amount of hose out
+    //HoseReelOverride(); // This checks to see if the hose reel is keeping the proper amount of hose out
     }
     else{ // shut down all of the systems untill this is figured out
      boomServoOutput = 5000;
+     dac1.setDACOutVoltage(boomServoOutput, 0);
      dragflowServoOutput = 5000;
+     dac2.setDACOutVoltage(dragflowServoOutput, 0);
      trolleyServoOutput = 5000;
+     dac1.setDACOutVoltage(trolleyServoOutput, 1);
      hoseReelServoOutput = 5000;
-     hoseGuideServoOutput = 5000;     
+     dac2.setDACOutVoltage(hoseReelServoOutput, 1);
+     hoseGuideServoOutput = 5000;
+     dac3.setDACOutVoltage(hoseGuideServoOutput, 0);     
     }
     //interruptbool1 = false;
 }
@@ -438,11 +443,11 @@ void HoseGuideControl(){
   // of the guide encoder to the location of the reel encoder.
   //For every 1 revolution of the the hose reel, the guide needs to move 10 inches.
   // This is about 5.3 degrees (7073 encoder counts) scale is then .0245
-  
-   hoseGuidePosition = hoseReelCurrentPosition * hoseGPosScale;
+   //hoseGuidePosition = hoseReelCurrentPosition * hoseGPosScale;
+   
    hoseGuideCurrentPosition = (int32_t)hoseguideencoder.getCount();
    int32_t HoseGuideError = hoseGuidePosition - hoseGuideCurrentPosition;
-   if(abs(HoseReelError) > HoseReeldb){
+   if(abs(HoseGuideError) > HoseGuidedb){
    hoseGuideVelocity =  hoseGuideLastPosition - hoseGuideCurrentPosition;
    hoseGuideControlCommand = (float)(HoseGuideError * HoseGuideG) + (float)(hoseGuideVelocity * HoseGuideD);
    if(hoseGuideControlCommand > HoseGuideClipOut) hoseGuideControlCommand = HoseGuideClipOut;
@@ -891,8 +896,8 @@ void setup() {
   boomencoder.attachFullQuad(17, 16);
   trolleyencoder.attachSingleEdge(35, 34);
   dragflowencoder.attachSingleEdge(33, 32);
-  hosereelencoder.attachHalfQuad(26, 25);
-  hoseguideencoder.attachSingleEdge(14, 13);  
+  hosereelencoder.attachFullQuad(26, 25);
+  hoseguideencoder.attachHalfQuad(14, 13);  
   // set starting count value after attaching
   boomencoder.setFilter(255);
   trolleyencoder.setFilter(255);
@@ -1109,6 +1114,9 @@ void Deal_With_client() {
             else if (header.indexOf("GET /Start_Loop") >= 0){
               RunLoop = true;
               
+            }
+            else if (header.indexOf("GET /Zero_Guide_Enc") >= 0){
+              RunLoop = true;
             }
             else if (header.indexOf("GET /form/submit?New_Boom_Location") >= 0) {
               parseLoopValues();
@@ -1401,6 +1409,7 @@ String Lower() {
   Value += ("<a href=\"/Save_To_EEprom\"><button class=\"button btn_on\">Save to EEprom</button></a>");
   Value += ("<a href=\"/Stop_Loop\"><button class=\"button btn_on\">Stop Loop</button></a>");
   Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a>");
+  Value += ("<a href=\"/Zero_Guide_Enc\"><button class=\"button btn_off\">Zero Guide</button></a>");
   
   
   return Value; 
