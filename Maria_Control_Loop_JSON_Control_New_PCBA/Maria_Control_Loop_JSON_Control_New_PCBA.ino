@@ -107,7 +107,7 @@ uint16_t looptimer = 2000; //This is a divider used to set loop interupt time
 // *******************
 
 int32_t boomPosition = 0;
-int boomVelocity = 0;
+int32_t boomVelocity = 0;
 int32_t boomLastPosition = 0;
 int boomServoOutput = 0;
 int LastboomServoOutput = 0;
@@ -126,11 +126,11 @@ int BoomClipLeft = -2047;
 int Boomdb = 0;
 
 int32_t trolleyPosition = 0;
-int trolleyVelocity = 0;
-int trolleyLastPosition = 0;
+int32_t trolleyVelocity = 0;
+int32_t trolleyLastPosition = 0;
 int trolleyServoOutput = 0;
 int LasttrolleyServoOutput = 0;
-int maxtrolleylocation = 90;
+int32_t maxtrolleylocation = 90;
 int32_t trolleyCurrentPosition = 0;
 int32_t TrolleyError = 0;
 float Trencoderperft = 7639.; // Overwritten when Saved variables are read
@@ -146,13 +146,13 @@ int Trolleydb = 0;
 int goToHere = 3000;
 
 int32_t hoseReelPosition = 0;
-int hoseReelVelocity = 0;
+int32_t hoseReelVelocity = 0;
 int movingOutVel = 75;  // This is about .5 ft/sec in encodercounts/sec
 int movingInVel = -10; // Used to chech if the trolley or dredge is moving in
 int hoseReelStall = -5; // checks to see if the hosereel has stalled pulling in the pipe
 // The above are used to check if the hose reel is controlling the pipe correctly
 
-int hoseReelLastPosition = 0;
+int32_t hoseReelLastPosition = 0;
 int hoseReelServoOutput = 0;
 int LasthoseReelServoOutput = 0;
 int32_t hoseReelCurrentPosition = 0;
@@ -170,8 +170,8 @@ int HoseReelClipIn = -2047;
 int HoseReeldb = 0;
 
 int32_t hoseGuidePosition = 0;
-int hoseGuideVelocity = 0;
-int hoseGuideLastPosition = 0;
+int32_t hoseGuideVelocity = 0;
+int32_t hoseGuideLastPosition = 0;
 int hoseGuideServoOutput = 0;
 int LasthoseGuideServoOutput = 0;
 int32_t hoseGuideCurrentPosition = 0;
@@ -187,8 +187,8 @@ int HoseGuidedb = 0;
 
 int32_t dragflowPosition = 0;
 float dragflowheight = 0;
-int dragflowVelocity = 0;
-int dragflowLastPosition = 0;
+int32_t dragflowVelocity = 0;
+int32_t dragflowLastPosition = 0;
 int dragflowServoOutput = 0;
 int LastdragflowServoOutput = 0;
 int32_t dragflowCurrentPosition = 0;
@@ -201,6 +201,7 @@ float DragflowD = 0;
 int DragflowClipUp = 2047;
 int DragflowClipDown = -2047;
 int Dragflowdb = 0;
+
 float MaxDdepthchange = 2.0;
 float MaxBAngchange = .5;
 float MaxTrollchange = 2.0;
