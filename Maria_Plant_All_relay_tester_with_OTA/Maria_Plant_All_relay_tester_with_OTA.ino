@@ -86,19 +86,18 @@ byte VFD_Concentrator5_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is o
 byte VFD_Concentrator6_Low_Speed = 0;   //  Signal HIGH sets concentrator to  panel preset low speed
 byte VFD_Concentrator6_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is off )
 
-byte VFD_Booster_Pump_15HP_Low_Speed = 0;  //not used, but this relay could be later on
-byte VFD_Booster_Pump_15HP = 0;
+//byte VFD_Booster_Pump_15HP_Low_Speed = 0;  //not used, but this relay could be later on
+byte VFD_Table = 0;
 
-byte VFD_Tails_Conveyor = 0;
-byte VFD_Screen = 0;
-byte VFD_Primary_VT40 = 0;
-byte VFD_Secondary_VT40 = 0;
-byte VFD_Submersible_Pump = 0;    //Also has rheostat connected directly to the VFD
-byte VFD_60_HP_Pump = 0;          // Set pin 43 to control the 60 hp pump
-byte VFD_50_HP_Pump = 0;          // //Also has rheostat connected directly to the VFD
-byte VFD_Hopper = 0;              //Also has rheostat connected directly to the VFD
-byte VFD_20HP_Transfer_Pump = 0;  //Also has rheostat connected directly to the VFD
-byte VFD_60_ft_Conveyor = 0;
+byte VFD_Starboard_Sump = 0;
+byte VFD_Port_Screen = 0;
+byte VFD_3_Tsurumi = 0;
+byte VFD_2_Tsurumi = 0;
+byte VFD_Tails_Pump = 0;    //Also has rheostat connected directly to the VFD
+byte VFD_Starboard_Screen = 0;          // Set pin 43 to control the 60 hp pump
+byte VFD_Port_Sump = 0;          // //Also has rheostat connected directly to the VFD
+byte VFD_Riven_Pumps = 0;  //Also has rheostat connected directly to the VFD
+byte VFD_Sluice_Pumps = 0;
 
 
 byte Ball_Valve1 = Set_Valve_15_Percent_Open;  // These 3 pins support PWM and we'll control the valves this way.
@@ -197,7 +196,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 // Replace with your network credentials
-const char *ssid = "Gold";
+const char *ssid = "Gold_Plant";
 const char *password = "123456789";
 
 // Set web server port number to 80
@@ -653,11 +652,11 @@ void Deal_With_client() {
               }
               Update_Valve_Module();
             }
-            if (header.indexOf("GET /Hopper") >= 0) {
-              if (VFD_Hopper == 0) {
-                VFD_Hopper = 1;
+            if (header.indexOf("GET /Port_Sump") >= 0) {
+              if (VFD_Port_Sump == 0) {
+                VFD_Port_Sump = 1;
               } else {
-                VFD_Hopper = 0;
+                VFD_Port_Sump = 0;
               }
               Update_VFD2_Module();
             }
@@ -670,79 +669,79 @@ void Deal_With_client() {
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /60_ft") >= 0) {
-              if (VFD_60_ft_Conveyor == 0) {
-                VFD_60_ft_Conveyor = 1;
+            if (header.indexOf("GET /Starboard_Sump") >= 0) {
+              if (VFD_Starboard_Sump == 0) {
+                VFD_Starboard_Sump = 1;
               } else {
-                VFD_60_ft_Conveyor = 0;
+                VFD_Starboard_Sump = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /Tails") >= 0) {
-              if (VFD_Tails_Conveyor == 0) {
-                VFD_Tails_Conveyor = 1;
+            if (header.indexOf("GET /Tails_Pump") >= 0) {
+              if (VFD_Tails_Pump == 0) {
+                VFD_Tails_Pump = 1;
               } else {
-                VFD_Tails_Conveyor = 0;
+                VFD_Tails_Pump = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /Screen") >= 0) {
-              if (VFD_Screen == 0) {
-                VFD_Screen = 1;
+            if (header.indexOf("GET /Port_Screen") >= 0) {
+              if (VFD_Port_Screen == 0) {
+                VFD_Port_Screen = 1;
               } else {
-                VFD_Screen = 0;
+                VFD_Port_Screen = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /VT40_1") >= 0) {
-              if (VFD_Primary_VT40 == 0) {
-                VFD_Primary_VT40 = 1;
+            if (header.indexOf("GET /(3)_Tsurumi") >= 0) {
+              if (VFD_3_Tsurumi == 0) {
+                VFD_3_Tsurumi = 1;
               } else {
-                VFD_Primary_VT40 = 0;
+                VFD_3_Tsurumi = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /VT40_2") >= 0) {
-              if (VFD_Secondary_VT40 == 0) {
-                VFD_Secondary_VT40 = 1;
+            if (header.indexOf("GET /(2)_Tsurumi") >= 0) {
+              if (VFD_2_Tsurumi == 0) {
+                VFD_2_Tsurumi = 1;
               } else {
-                VFD_Secondary_VT40 = 0;
+                VFD_2_Tsurumi = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /Submersible") >= 0) {
-              if (VFD_Submersible_Pump == 0) {
-                VFD_Submersible_Pump = 1;
+            if (header.indexOf("GET /Starboard_Screen") >= 0) {
+              if (VFD_Starboard_Screen == 0) {
+                VFD_Starboard_Screen = 1;
               } else {
-                VFD_Submersible_Pump = 0;
+                VFD_Starboard_Screen = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /60_HP") >= 0) {
-              if (VFD_60_HP_Pump == 0) {
-                VFD_60_HP_Pump = 1;
+            if (header.indexOf("GET /Riven_Pumps") >= 0) {
+              if (VFD_Riven_Pumps == 0) {
+                VFD_Riven_Pumps = 1;
               } else {
-                VFD_60_HP_Pump = 0;
+                VFD_Riven_Pumps = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /50_HP") >= 0) {
-              if (VFD_50_HP_Pump == 0) {
-                VFD_50_HP_Pump = 1;
+            if (header.indexOf("GET /Sluice_Pumps") >= 0) {
+              if (VFD_Sluice_Pumps == 0) {
+                VFD_Sluice_Pumps = 1;
               } else {
-                VFD_50_HP_Pump = 0;
+                VFD_Sluice_Pumps = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /30_HP") >= 0) {
-              if (VFD_30_HP_Pump == 0) {
-                VFD_30_HP_Pump = 1;
+            if (header.indexOf("GET /Table") >= 0) {
+              if (VFD_Table == 0) {
+                VFD_Table = 1;
               } else {
-                VFD_30_HP_Pump = 0;
+                VFD_Table = 0;
               }
               Update_VFD2_Module();
             }
-            if (header.indexOf("GET /Transfer") >= 0) {
+            /*if (header.indexOf("GET /Transfer") >= 0) {
               if (VFD_20HP_Transfer_Pump == 0) {
                 VFD_20HP_Transfer_Pump = 1;
               } else {
@@ -757,7 +756,7 @@ void Deal_With_client() {
                 VFD_Booster_Pump_15HP = 0;
               }
               Update_VFD2_Module();
-            }
+            }*/
             if (header.indexOf("GET /Update") >= 0) {
               Serial.println("Saw Update");
               Lower_Content = Lower();
@@ -1001,63 +1000,59 @@ String Lower() {
     Value += "<a href=\"/Conc6_Air\"><button class=\"button btn_off\">#6 Air Valve on</button>";
   }
 
-  if (VFD_Hopper == 1) {
-    Value += "<a href=\"/Hopper\"><button class=\"button btn_on\">Hopper Off</button>";
+  if (VFD_Starboard_Sump == 1) {
+    Value += "<a href=\"/Starboard_Sump\"><button class=\"button btn_on\">Starboard Sump Off</button>";
   } else {
-    Value += "<a href=\"/Hopper\"><button class=\"button btn_off\">Hopper On</button>";
+    Value += "<a href=\"/Starboard_Sump\"><button class=\"button btn_off\">Starboard Sump On</button>";
   }
 
-  if (VFD_Conveyor_Sluice == 1) {
-    Value += "<a href=\"/Sluice\"><button class=\"button btn_on\">Conveyor Sluice Off</button>";
+  if (VFD_Starboard_Screen == 1) {
+    Value += "<a href=\"/Starboard_Screen\"><button class=\"button btn_on\">Starboard Screen Off</button>";
   } else {
-    Value += "<a href=\"/Sluice\"><button class=\"button btn_off\">Conveyor Sluice On</button>";
+    Value += "<a href=\"/Starboard_Screen\"><button class=\"button btn_off\">Starboard Screen On</button>";
   }
 
-  if (VFD_Screen == 1) {
-    Value += "<a href=\"/Screen\"><button class=\"button btn_on\">Screen off</button>";
+  if (VFD_Port_Screen == 1) {
+    Value += "<a href=\"/Port_Screen\"><button class=\"button btn_on\">Port Screen off</button>";
   } else {
-    Value += "<a href=\"/Screen\"><button class=\"button btn_off\">Screen on</button>";
+    Value += "<a href=\"/Port_Screen\"><button class=\"button btn_off\">Port Screen on</button>";
   }
-  if (VFD_Tails_Conveyor == 1) {
-    Value += "<a href=\"/Tails\"><button class=\"button btn_on\">Tails Convey off</button>";
+  if (VFD_Tails_Pump == 1) {
+    Value += "<a href=\"/Tails_Pump\"><button class=\"button btn_on\">Tails Pump off</button>";
   } else {
-    Value += "<a href=\"/Tails\"><button class=\"button btn_off\">Tails Convey on</button>";
+    Value += "<a href=\"/Tails_Pump\"><button class=\"button btn_off\">Tails Pump on</button>";
   }
-  if (VFD_Primary_VT40 == 1) {
-    Value += "<a href=\"/VT40_1\"><button class=\"button btn_on\">VT40_1 off</button>";
+  if (VFD_3_Tsurumi == 1) {
+    Value += "<a href=\"/(3)_Tsurumi\"><button class=\"button btn_on\">(3)_Tsurumi off</button>";
   } else {
-    Value += "<a href=\"/VT40_1\"><button class=\"button btn_off\">VT40_1 on</button>";
+    Value += "<a href=\"/(3)_Tsurumi\"><button class=\"button btn_off\">(3)_Tsurumi on</button>";
   }
-  if (VFD_Secondary_VT40 == 1) {
-    Value += "<a href=\"/VT40_2\"><button class=\"button btn_on\">VT40_2 off</button>";
+  if (VFD_2_Tsurumi == 1) {
+    Value += "<a href=\"/(2)_Tsurumi\"><button class=\"button btn_on\">(2)_Tsurumi off</button>";
   } else {
-    Value += "<a href=\"/VT40_2\"><button class=\"button btn_off\">VT40_2 on</button>";
+    Value += "<a href=\"/(2)_Tsurumi\"><button class=\"button btn_off\">(2)_Tsurumi on</button>";
   }
-  if (VFD_Submersible_Pump == 1) {
-    Value += "<a href=\"/Submersible\"><button class=\"button btn_on\">Submers Pump off</button>";
+  if (VFD_Port_Sump == 1) {
+    Value += "<a href=\"/Port_Sump\"><button class=\"button btn_on\">Port Sump off</button>";
   } else {
-    Value += "<a href=\"/Submersible\"><button class=\"button btn_off\">Submers Pump on</button>";
+    Value += "<a href=\"/Port_Sump\"><button class=\"button btn_off\">Port Sump on</button>";
   }
-  if (VFD_60_HP_Pump == 1) {
-    Value += "<a href=\"/60_HP\"><button class=\"button btn_on\">60HP Pump off</button>";
+  if (VFD_Riven_Pumps == 1) {
+    Value += "<a href=\"/Riven_Pumps\"><button class=\"button btn_on\">Riven Pumps off</button>";
   } else {
-    Value += "<a href=\"/60_HP\"><button class=\"button btn_off\">60HP Pump on</button>";
+    Value += "<a href=\"/Riven_Pumps\"><button class=\"button btn_off\">Riven Pumps on</button>";
   }
-  if (VFD_50_HP_Pump == 1) {
-    Value += "<a href=\"/50_HP\"><button class=\"button btn_on\">50HP Pump off</button>";
+  if (VFD_Sluice_Pumps == 1) {
+    Value += "<a href=\"/Sluice_Pumps\"><button class=\"button btn_on\">Sluice Pumps off</button>";
   } else {
-    Value += "<a href=\"/50_HP\"><button class=\"button btn_off\">50HP Pump on</button>";
+    Value += "<a href=\"/Sluice_Pumps\"><button class=\"button btn_off\">Sluice Pumps on</button>";
   }
-  if (VFD_30_HP_Pump == 1) {
-    Value += "<a href=\"/30_HP\"><button class=\"button btn_on\">30HP Pump off</button>";
+  if (VFD_Table == 1) {
+    Value += "<a href=\"/Table\"><button class=\"button btn_on\">Table off</button>";
   } else {
-    Value += "<a href=\"/30_HP\"><button class=\"button btn_off\">30HP Pump on</button>";
+    Value += "<a href=\"/Table\"><button class=\"button btn_off\">Table on</button>";
   }
-  if (VFD_20HP_Transfer_Pump == 1) {
-    Value += "<a href=\"/Transfer\"><button class=\"button btn_on\">Transfer Pump off</button>";
-  } else {
-    Value += "<a href=\"/Transfer\"><button class=\"button btn_off\">Transfer Pump on</button>";
-  }
+  /*
   if (VFD_60_ft_Conveyor == 1) {
     Value += "<a href=\"/60_ft\"><button class=\"button btn_on\">60ft Conveyor off</button>";
   } else {
@@ -1067,7 +1062,7 @@ String Lower() {
     Value += "<a href=\"/Booster\"><button class=\"button btn_on\">Booster pump off</button>";
   } else {
     Value += "<a href=\"/Booster\"><button class=\"button btn_off\">Booster pump on</button>";
-  }
+  }*/
   return Value;
 }  // end of Lower function
 
@@ -1113,7 +1108,7 @@ void Update_Valve_Module() {
     Data_1.valve_relay_states &= 0b1111011111111111; Data_1.valve_relay_states |= Conc4_1in_Valve<<11;
     Data_1.valve_relay_states &= 0b1110111111111111; Data_1.valve_relay_states |= Conc5_1in_Valve<<12;
     Data_1.valve_relay_states &= 0b1101111111111111; Data_1.valve_relay_states |= Conc6_1in_Valve<<13;
-    Data_1.valve_relay_states &= 0b1011111111111111; Data_1.valve_relay_states |= VFD_Conveyor_Sluice<<14;
+    //Data_1.valve_relay_states &= 0b1011111111111111; Data_1.valve_relay_states |= VFD_Conveyor_Sluice<<14;
     //Data_1.valve_relay_states &= 0b0111111111111111; Data_1.valve_relay_states |= Conc2_Air_Valve<<15;
     
     Data_1.Ball_valve_1 = Ball_Valve1; // Ball_valveX will contain value to send to 0-10 module
@@ -1181,20 +1176,20 @@ void Update_VFD1_Module() {
 }  // end Update_VFD1_Module
 void Update_VFD2_Module() {
 
-  Data_3.VFD2_relay_states &= 0b1111111011111111; Data_3.VFD2_relay_states |= VFD_Hopper<<8;
-  Data_3.VFD2_relay_states &= 0b1111110111111111; Data_3.VFD2_relay_states |= VFD_Conveyor_Sluice<<9;
-  Data_3.VFD2_relay_states &= 0b1111101111111111; Data_3.VFD2_relay_states |= VFD_Tails_Conveyor<<10;
-  Data_3.VFD2_relay_states &= 0b1111011111111111; Data_3.VFD2_relay_states |= VFD_Screen<<11;
-  Data_3.VFD2_relay_states &= 0b1110111111111111; Data_3.VFD2_relay_states |= VFD_Primary_VT40<<12;
-  Data_3.VFD2_relay_states &= 0b1101111111111111; Data_3.VFD2_relay_states |= VFD_Secondary_VT40<<13;
-  Data_3.VFD2_relay_states &= 0b1011111111111111; Data_3.VFD2_relay_states |= VFD_Submersible_Pump<<14;
-  Data_3.VFD2_relay_states &= 0b0111111111111111; Data_3.VFD2_relay_states |= VFD_Booster_Pump_15HP<<15;
+  Data_3.VFD2_relay_states &= 0b1111111011111111; Data_3.VFD2_relay_states |= VFD_Starboard_Sump<<8;
+  Data_3.VFD2_relay_states &= 0b1111110111111111; Data_3.VFD2_relay_states |= VFD_Port_Sump<<9;
+  Data_3.VFD2_relay_states &= 0b1111101111111111; Data_3.VFD2_relay_states |= VFD_Starboard_Screen<<10;
+  Data_3.VFD2_relay_states &= 0b1111011111111111; Data_3.VFD2_relay_states |= VFD_Port_Screen<<11;
+  Data_3.VFD2_relay_states &= 0b1110111111111111; Data_3.VFD2_relay_states |= VFD_3_Tsurumi<<12;
+  Data_3.VFD2_relay_states &= 0b1101111111111111; Data_3.VFD2_relay_states |= VFD_2_Tsurumi<<13;
+  Data_3.VFD2_relay_states &= 0b1011111111111111; Data_3.VFD2_relay_states |= VFD_Tails_Pump<<14;
+  Data_3.VFD2_relay_states &= 0b0111111111111111; Data_3.VFD2_relay_states |= VFD_Riven_Pumps<<15;
   
-  Data_3.VFD2_relay_states &= 0b1111111111111110; Data_3.VFD2_relay_states |= VFD_20HP_Transfer_Pump;
-  Data_3.VFD2_relay_states &= 0b1111111111111101; Data_3.VFD2_relay_states |= VFD_60_HP_Pump<<1;
-  Data_3.VFD2_relay_states &= 0b1111111111111011; Data_3.VFD2_relay_states |= VFD_30_HP_Pump<<2;
-  Data_3.VFD2_relay_states &= 0b1111111111110111; Data_3.VFD2_relay_states |= VFD_50_HP_Pump<<3;
-  Data_3.VFD2_relay_states &= 0b1111111111101111; Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor<<4;
+  Data_3.VFD2_relay_states &= 0b1111111111111110; Data_3.VFD2_relay_states |= VFD_Sluice_Pumps;
+  Data_3.VFD2_relay_states &= 0b1111111111111101; Data_3.VFD2_relay_states |= VFD_Table<<1;
+  //Data_3.VFD2_relay_states &= 0b1111111111111011; Data_3.VFD2_relay_states |= VFD_30_HP_Pump<<2;
+  //Data_3.VFD2_relay_states &= 0b1111111111110111; Data_3.VFD2_relay_states |= VFD_50_HP_Pump<<3;
+  //Data_3.VFD2_relay_states &= 0b1111111111101111; Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor<<4;
   //Data_3.VFD2_relay_states &= 0b1111111111011111; Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor<<5;
   //Data_3.VFD2_relay_states &= 0b1111111110111111; Data_3.VFD2_relay_states |= VFD_Submersible_Pump<<6;
 
