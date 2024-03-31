@@ -192,6 +192,12 @@ typedef struct Test_str {
 Test_str Trigger_State;
 String Limitswitchstatus = "Okay";
 byte New_Message = 0;
+bool BoomManualControl = false;
+bool SkipBoomLoop = false;
+bool TrolleyManualControl = false;
+bool SkipTrolleyLoop = false;
+bool DragManualControl = false;
+bool SkipDragLoop = false;
 bool transition = false; //used for switching to linked dragflow and trolley position
 bool Hose_reel_guide_right_switch = false; //#10
 bool Hose_reel_guide_left_switch = false; //#11
@@ -277,9 +283,9 @@ int32_t IIRFilter(int32_t Input){
 
 void ControlLoop() {  
  if (RunLoop){ // Checks to see if the loop is disabled
-    BoomControl();
-    TrolleyControl();
-    DragflowControl();
+    if(!SkipBoomLoop) BoomControl(); 
+    if(!SkipTrolleyLoop) TrolleyControl();
+    if(!SkipDragLoop) DragflowControl();
     HoseReelControl();
     HoseGuideControl();
     //HoseReelOverride(); // This checks to see if the hose reel is keeping the proper amount of hose out
@@ -1135,8 +1141,11 @@ void Deal_With_client() {
               RunLoop = true;
               
             }
-            else if (header.indexOf("GET /Zero_Guide_Enc") >= 0){
-              hoseguideencoder.setCount(0);
+            else if (header.indexOf("GET /Zero_Trolley_Enc") >= 0){
+              trolleyencoder.setCount(0);
+            }
+            else if (header.indexOf("GET /Zero_Drag_Enc") >= 0){
+              dragflowencoder.setCount(0);
             }
             else if (header.indexOf("GET /Link_Winches") >= 0){
             Linkwinches = true;
@@ -1145,6 +1154,39 @@ void Deal_With_client() {
             else if (header.indexOf("GET /UnLink_Winches") >= 0){
             Linkwinches = false;
             //goto END;   //Don't need to refresh the entire page
+            }
+            if (header.indexOf("GET /BoomControl") >= 0) {
+              if (BoomManualControl == true) {
+                dac1.setDACOutVoltage(500, 0); //set to below 15% of 10 volts to goto manual control
+                SkipBoomLoop = true;
+                BoomManualControl = !BoomManualControl;
+              } else {
+                dac1.setDACOutVoltage(5000, 0); //set to home (5 volts)
+                SkipBoomLoop = false; //Turn boom loop back on
+                BoomManualControl = !BoomManualControl;
+              }
+            }
+            if (header.indexOf("GET /TrolleyControl") >= 0) {
+              if (BoomManualControl == true) {
+                dac1.setDACOutVoltage(500, 1); //set to below 15% of 10 volts to goto manual control
+                SkipTrolleyLoop = true;
+                TrolleyManualControl = !TrolleyManualControl;
+              } else {
+                dac1.setDACOutVoltage(5000, 1); //set to home (5 volts)
+                SkipTrolleyLoop = false; //Turn boom loop back on
+                TrolleyManualControl = !TrolleyManualControl;
+              }
+            }
+            if (header.indexOf("GET /DragControl") >= 0) {
+              if (BoomManualControl == true) {
+                dac2.setDACOutVoltage(500, 0); //set to below 15% of 10 volts to goto manual control
+                SkipDragLoop = true;
+                DragManualControl = !DragManualControl;
+              } else {
+                dac2.setDACOutVoltage(5000, 0); //set to home (5 volts)
+                SkipDragLoop = false; //Turn boom loop back on
+                DragManualControl = !DragManualControl;
+              }
             }
             else if (header.indexOf("GET /form/submit?New_Boom_Location") >= 0) {
               parseLoopValues();
@@ -1434,14 +1476,29 @@ String Lower() {
   String Value ="";
   
   
-  Value += ("<a href=\"/Update_Status\"><button class=\"button btn_off\">Update Status</button></a>");
+  Value += ("<p><a href=\"/Update_Status\"><button class=\"button btn_off\">Update Status</button></a>");
   Value += ("<a href=\"/Save_To_EEprom\"><button class=\"button btn_on\">Save to EEprom</button></a>");
   Value += ("<a href=\"/Stop_Loop\"><button class=\"button btn_on\">Stop Loop</button></a>");
-  Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a>");
-  Value += ("<a href=\"/Zero_Guide_Enc\"><button class=\"button btn_off\">Zero Guide</button></a>");
+  Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a></p>");
+  Value += ("<p><a href=\"/Zero_Trolley_Enc\"><button class=\"button btn_off\">Zero Trolley</button></a>");
+  Value += ("<a href=\"/Zero_Drag_Enc\"><button class=\"button btn_off\">Zero Drag</button></a>");
   Value += ("<a href=\"/Link_Winches\"><button class=\"button btn_off\">Link Winches</button></a>");
   Value += ("<a href=\"/UnLink_Winches\"><button class=\"button btn_off\">UnLink Winches</button></a>");
-  
+  if (BoomManualControl == false) {
+    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom Servo</button></a>";
+  } else {
+    Value += "<a href=\"/BoomControl\"><button class=\"button btn_off\">Boom Manual</button></a>";
+  }
+  if (TrolleyManualControl == false) {
+    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley Servo</button></a>";
+  } else {
+    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_off\">Trolley Manual</button></a>";
+  }
+  if (DragManualControl == false) {
+    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag Servo</button></a></p>";
+  } else {
+    Value += "<a href=\"/DragControl\"><button class=\"button btn_off\">Drag Manual</button></a></p>";
+  }
   return Value; 
 } // end of Lower function
 
@@ -1465,7 +1522,7 @@ String Htmlcode() {
     Value += (".btn_Med {width: 18vw; height:9vw; font-size: 2vw;}");
     Value += ("</style></head>");
     
-    Value += ("<body><h1>ESP32 Web Server</h1>");
-    Value += ("<h2>Test The Control Loop Function</h2>");
+    Value += ("<body><h1>Booom and Trolley loop Tuner</h1>");
+    
   return Value;
 }  
