@@ -86,7 +86,7 @@ byte VFD_Concentrator5_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is o
 byte VFD_Concentrator6_Low_Speed = 0;   //  Signal HIGH sets concentrator to  panel preset low speed
 byte VFD_Concentrator6_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is off )
 
-//byte VFD_Booster_Pump_15HP_Low_Speed = 0;  //not used, but this relay could be later on
+byte VFD_Booster_Pump_15HP = 0;  //
 byte VFD_Table = 0;
 
 byte VFD_Starboard_Sump = 0;
@@ -741,7 +741,7 @@ void Deal_With_client() {
                 VFD_20HP_Transfer_Pump = 0;
               }
               Update_VFD2_Module();
-            }
+            }*/
             if (header.indexOf("GET /Booster") >= 0) {
               if (VFD_Booster_Pump_15HP == 0) {
                 VFD_Booster_Pump_15HP = 1;
@@ -749,7 +749,7 @@ void Deal_With_client() {
                 VFD_Booster_Pump_15HP = 0;
               }
               Update_VFD2_Module();
-            }*/
+            }
             if (header.indexOf("GET /Update") >= 0) {
               Serial.println("Saw Update");
               Lower_Content = Lower();
@@ -1045,12 +1045,12 @@ String Lower() {
     Value += "<a href=\"/60_ft\"><button class=\"button btn_on\">60ft Conveyor off</button>";
   } else {
     Value += "<a href=\"/60_ft\"><button class=\"button btn_off\">60ft Conveyor on</button>";
-  }
+  }*/
   if (VFD_Booster_Pump_15HP == 1) {
     Value += "<a href=\"/Booster\"><button class=\"button btn_on\">Booster pump off</button>";
   } else {
     Value += "<a href=\"/Booster\"><button class=\"button btn_off\">Booster pump on</button>";
-  }*/
+  }
   return Value;
 }  // end of Lower function
 
@@ -1171,7 +1171,7 @@ void Update_VFD2_Module() {
   Data_3.VFD2_relay_states &= 0b1110111111111111; Data_3.VFD2_relay_states |= VFD_3_Tsurumi<<12;
   Data_3.VFD2_relay_states &= 0b1101111111111111; Data_3.VFD2_relay_states |= VFD_2_Tsurumi<<13;
   Data_3.VFD2_relay_states &= 0b1011111111111111; Data_3.VFD2_relay_states |= VFD_Concentrator_Tails_Pump<<14;
-  //Data_3.VFD2_relay_states &= 0b0111111111111111; Data_3.VFD2_relay_states |= VFD_Riven_Pumps<<15;
+  Data_3.VFD2_relay_states &= 0b0111111111111111; Data_3.VFD2_relay_states |= VFD_Booster_Pump_15HP<<15;
   
   //Data_3.VFD2_relay_states &= 0b1111111111111110; Data_3.VFD2_relay_states |= VFD_Sluice_Pumps;
   Data_3.VFD2_relay_states &= 0b1111111111111101; Data_3.VFD2_relay_states |= VFD_Table<<1;
