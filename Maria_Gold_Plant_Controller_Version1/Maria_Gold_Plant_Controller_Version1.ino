@@ -131,19 +131,18 @@ byte VFD_Concentrator5_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is o
 byte VFD_Concentrator6_Low_Speed = 0;   //  Signal HIGH sets concentrator to  panel preset low speed
 byte VFD_Concentrator6_High_Speed = 0;  // (On - Signal HIGH) or Signal LOW is off )
 
-byte VFD_Booster_Pump_15HP_Low_Speed = 0;  //not used, but this relay could be later on
 byte VFD_Booster_Pump_15HP = 0;
 
-byte VFD_Tails_Conveyor = 0;
-byte VFD_Screen = 0;
-byte VFD_Primary_VT40 = 0;
-byte VFD_Secondary_VT40 = 0;
-byte VFD_Submersible_Pump = 0;    //Also has rheostat connected directly to the VFD
-byte VFD_60_HP_Pump = 0;          // Set pin 43 to control the 60 hp pump
-byte VFD_50_HP_Pump = 0;          // //Also has rheostat connected directly to the VFD
-byte VFD_Hopper = 0;              //Also has rheostat connected directly to the VFD
-byte VFD_20HP_Transfer_Pump = 0;  //Also has rheostat connected directly to the VFD
-byte VFD_60_ft_Conveyor = 0;
+byte VFD_Table = 0;
+
+byte VFD_Starboard_Sump = 0;
+byte VFD_Port_Screen = 0;
+byte VFD_3_Tsurumi = 0;
+byte VFD_2_Tsurumi = 0;
+byte VFD_Concentrator_Tails_Pump = 0;    //Also has rheostat connected directly to the VFD
+byte VFD_Overall_Tails_Pump = 0;
+byte VFD_Starboard_Screen = 0;          // Set pin 43 to control the 60 hp pump
+byte VFD_Port_Sump = 0;          // //Also has rheostat connected directly to the VFD
 
 
 byte Ball_Valve1 = Set_Valve_15_Percent_Open;  // These 3 pins support PWM and we'll control the valves this way.
@@ -236,8 +235,6 @@ VFD_Contoller2 Data_3;
 byte First_Time = 0;  //signals to the web page to do the initial setup
 byte New_Event = 1;
 byte Valve_Problem = 0;  // 0 means we connected with it, 1 means we failed to connect.
-byte VFD1_Problem = 0;
-byte VFD2_Problem = 0;
 byte Valve_retry_counter = 0;
 byte VFD1_retry_counter = 0;
 byte VFD2_retry_counter = 0;
@@ -277,7 +274,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 // Replace with your network credentials
-const char *ssid = "Gold";
+const char *ssid = "Gold_Plant";
 const char *password = "123456789";
 const int First_Cycle = 1;
 const int Second_Cycle = 2;
@@ -408,14 +405,9 @@ void setup() {
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE);
-  display.setCursor(0, 12);
-  display.println("Hello, world!");
-  display.setTextColor(SH110X_BLACK, SH110X_WHITE);  // 'inverted' text
-  display.println(3.141592);
-  display.setTextSize(1);
-  display.setTextColor(SH110X_WHITE);
-  display.print("0x");
-  display.println(0xDEADBEEF, HEX);
+  display.setCursor(0,12);
+  display.println("Maria Plant");
+  
   display.display();
   delay(5000);
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
@@ -456,7 +448,7 @@ void loop() {
       display.clearDisplay();
       //display.setTextSize(1);
       display.setCursor(0, 12);
-      display.print("Maria Control");
+      display.print("Maria Plant");
       display.setCursor(0, 30);
       display.println("Initializing ");
       display.display();
@@ -466,7 +458,7 @@ void loop() {
       display.clearDisplay();
       //display.setTextSize(1);
       display.setCursor(0, 12);
-      display.print("Maria Control");
+      display.print("Maria Plant");
       display.setCursor(0, 30);
       display.println("  Ready to ");
       display.println("  Start ");
@@ -477,7 +469,7 @@ void loop() {
       // This loop goes forever and runs every X minutes set by the pot
       // The range of delay is between 1 and 60 minutes
       // The time can be changed without re-starting the sequencer
-      VFD_Hopper = 1;  // Turn on, Also has rheostat conected directly to the VFD
+      //VFD_Hopper = 1;  // Turn on, Also has rheostat conected directly to the VFD
       Update_VFD2_Module();
       Last_State = Plant_running;
       while (Plant_Run_State == Plant_running) {
@@ -498,7 +490,7 @@ void loop() {
       display.clearDisplay();
       display.setTextSize(1);
       display.setCursor(0, 12);
-      display.print("Maria Control");
+      display.print("Maria Plant");
       display.setCursor(0, 26);
       display.print("   Waiting to ");
       display.setCursor(0, 40);
@@ -679,7 +671,7 @@ void Turn_On_Plant() {
   Update_VFD1_Module(7);             // 7 means we're not in the a,b,c cycles
 
   //VFD_Conveyor_Sluice = 1; //Turn on Conveyor_Sluice
-  VFD_Tails_Conveyor = 1;  // Turn on Tails Conveyor
+  /*VFD_Tails_Conveyor = 1;  // Turn on Tails Conveyor
   Update_VFD2_Module();
   delay(5000);     // 5 second delay
   VFD_Screen = 1;  // Turn on Screen
@@ -711,7 +703,7 @@ void Turn_On_Plant() {
   delay(5000);             // 5 second delay
   VFD_60_ft_Conveyor = 1;  // Turn on
   Update_VFD2_Module();
-  delay(5000);  // 5 second delay
+  delay(5000);  // 5 second delay */
                 //digitalWrite(VFD_Hopper_On,HIGH);  // Turn on, Also has rheostat conected directly to the VFD
 
   return;
@@ -853,7 +845,7 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
   display.display();
 
 
-  VFD_Hopper = 0;  // Turn off
+  //VFD_Hopper = 0;  // Turn off
   Update_VFD2_Module();
   display.setCursor(0, 30);
   display.print(" Hopper off");  //
@@ -862,7 +854,7 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
   display.display();
   delay(20000);  //wait 20 seconds
 
-  VFD_60_ft_Conveyor = 0;  // Turn off
+  //VFD_60_ft_Conveyor = 0;  // Turn off
   Update_VFD2_Module();
   display.clearDisplay();
   display.setCursor(0, 15);
@@ -875,8 +867,8 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
 
   delay(10000);  //wait 10 seconds
 
-  VFD_Screen = 0;          // Turn off Screen
-  VFD_Tails_Conveyor = 0;  // Turn off Tails Conveyor
+ // VFD_Screen = 0;          // Turn off Screen
+  //VFD_Tails_Conveyor = 0;  // Turn off Tails Conveyor
   Update_VFD2_Module();
   //digitalWrite(VFD_Conveyor_Sluice_High_Speed,HIGH); //Turn on Conveyor_Sluice
   display.clearDisplay();
@@ -890,7 +882,7 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
   delay(2000);
   // New delay added on the running the conveyor sluice DAD
   //delay(20000); //wait 20 seconds then turn off the conveyor sluice.
-  VFD_Conveyor_Sluice = 1;  //Turn on Conveyor_Sluice (Frank 5/6/2022)
+  //VFD_Conveyor_Sluice = 1;  //Turn on Conveyor_Sluice (Frank 5/6/2022)
   Update_VFD2_Module();
   display.clearDisplay();
   display.setCursor(0, 12);
@@ -961,43 +953,21 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
   display.display();
   Begin_Rinse_Cycle(5);  //Do the "C" Rinse cycle
 
-  /*lcd2.setCursor(0,0);
-  lcd2.print("  15hp Booster off"); //
-  lcd2.setCursor(0, 1);
-  lcd2.print("Submersible pump off"); //
-  lcd2.setCursor(0,2);
-  lcd2.print(" 50hp pump off  "); //
-  lcd2.setCursor(0, 3);
-  lcd2.print(" Waiting 10 sec "); */
-  VFD_Conveyor_Sluice = 0;    //Turn off Conveyor_Sluice (Frank 5/6/2022)
-  VFD_Booster_Pump_15HP = 0;  // Turn off Booster pump
-  VFD_Submersible_Pump = 0;   // Turn off Submersible pump
-  VFD_50_HP_Pump = 0;         // Turn off 50hp Transfer pump
+
+  //VFD_Conveyor_Sluice = 0;    //Turn off Conveyor_Sluice (Frank 5/6/2022)
+  //VFD_Booster_Pump_15HP = 0;  // Turn off Booster pump
+  //VFD_Submersible_Pump = 0;   // Turn off Submersible pump
+  //VFD_50_HP_Pump = 0;         // Turn off 50hp Transfer pump
   Update_VFD2_Module();
   delay(10000);  //wait 10 seconds
-  /*lcd2.clear();
-  lcd2.setCursor(0,0);
-  lcd2.print("  20hp pump off  "); //
-  lcd2.setCursor(0, 1);
-  lcd2.print("Waiting 10 sec "); //
-  
-  lcd2.setCursor(0,0);
-  lcd2.print(" 60hp pump off  "); //
-  lcd2.setCursor(0,0);
-  lcd2.print(" 30hp pump off  "); //
-  lcd2.setCursor(0, 1);
-  lcd2.print(" All concentrators"); //
-  lcd2.setCursor(0, 2);
-  lcd2.print(" off, 5 sec delays"); //
-  lcd2.setCursor(0, 3);
-  lcd2.print("Then  20 sec delay"); */
-  VFD_20HP_Transfer_Pump = 0;  // Turn off 20hp Transfer pump
+ 
+  //VFD_20HP_Transfer_Pump = 0;  // Turn off 20hp Transfer pump
   Update_VFD2_Module();
   delay(10000);        //wait 10 seconds
-  VFD_60_HP_Pump = 0;  // Turn off tails pump
+  //VFD_60_HP_Pump = 0;  // Turn off tails pump
   Update_VFD2_Module();
   delay(5000);         //wait 5 seconds
-  VFD_30_HP_Pump = 0;  // Turn off pump
+  //VFD_30_HP_Pump = 0;  // Turn off pump
   Update_VFD2_Module();
   // Turn off all Concentrators
   VFD_Concentrator1_High_Speed = 0;  // Turn off
@@ -1019,17 +989,8 @@ void Stop_Plant_And_Rinse_All_Concentrators() {
   Update_VFD1_Module(7);
   delay(20000);  // wait 20 seconds
 
-  /*lcd2.clear();
-  lcd2.setCursor(0,0);
-  lcd2.print(" VT-40 1 off"); //
-  lcd2.setCursor(0, 1);
-  lcd2.print("  VT-40 2 off"); //
-  lcd2.setCursor(0, 2);
-  lcd2.print(" 1.5in valves open"); //
-  lcd2.setCursor(0, 3);
-  lcd2.print("Then 10 sec delay"); */
-  VFD_Primary_VT40 = 0;    // Turn off Primary VT40
-  VFD_Secondary_VT40 = 0;  // Turn off Secondary VT40
+  //VFD_Primary_VT40 = 0;    // Turn off Primary VT40
+  //VFD_Secondary_VT40 = 0;  // Turn off Secondary VT40
   Update_VFD2_Module();
 
   // open all 1.5in valves at the end of the day
@@ -1120,7 +1081,7 @@ void Deal_With_client() {
               New_Event = 0;  // No intervention from main loop required
               First_Time = 1;
             }
-            if (header.indexOf("GET /Hopper_stop") >= 0) {
+            /*if (header.indexOf("GET /Hopper_stop") >= 0) {
               VFD_Hopper = 0;
               //New_Event = 1; // run through the remote devices again
               Update_VFD2_Module();
@@ -1177,7 +1138,7 @@ void Deal_With_client() {
               Conveyor_sluice_manual_off = 0;
               //New_Event = 1; // run through the remote devices again
               First_Time = 1;
-            }
+            }*/
             if (header.indexOf("GET /Update") >= 0) {
               Serial.println("Saw Update");
               Stopstart_Content = Stop_Buttons();
@@ -1467,52 +1428,57 @@ String Lower() {
   }
 
 
-  if (VFD_Hopper == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Hopper on</button>";
+  if (VFD_Port_Sump == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Port Sump on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Hopper off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">Port Sump off</button>";
   }
-  if (VFD_Conveyor_Sluice == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Conveyor Sluice on</button>";
+  if (VFD_Starboard_Sump == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Starboard Sump on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Conveyor Sluice off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">Starboard Sump off</button>";
   }
-  if (VFD_Screen == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Screen on</button>";
+  if (VFD_Starboard_Screen == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Starboard Screen on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Screen off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">Starboard Screen off</button>";
   }
-  if (VFD_Tails_Conveyor == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Tails Convey on</button>";
+  if (VFD_Port_Screen == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Port Screen on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Tails Convey off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">Port Screen off</button>";
   }
-  if (VFD_Primary_VT40 == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">VT40_1 on</button>";
+  if (VFD_3_Tsurumi == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">3_Tsurumi on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">VT40_1 off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">3_Tsurumi off</button>";
   }
-  if (VFD_Secondary_VT40 == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">VT40_2 on</button>";
+  if (VFD_2_Tsurumi == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">2_Tsurumi on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">VT40_2 off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">2_Tsurumi off</button>";
   }
-  if (VFD_Submersible_Pump == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Submers Pump on</button>";
+  if (VFD_Concentrator_Tails_Pump == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">ConcTails Pump on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Submers Pump off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">ConcTails Pump off</button>";
   }
-  if (VFD_60_HP_Pump == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">60HP Pump on</button>";
+  if (VFD_Table == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Table on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">60HP Pump off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">Table off</button>";
   }
-  if (VFD_50_HP_Pump == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">50HP Pump on</button>";
+  if (VFD_Overall_Tails_Pump == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">OverTails Pump on</button>";
   } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">50HP Pump off</button>";
+    Value += "<a><button class=\"button btn_off btn_dis\">OverTails Pump off</button>";
   }
-  if (VFD_30_HP_Pump == 1) {
+  if (VFD_Booster_Pump_15HP == 1) {
+    Value += "<a><button class=\"button btn_on btn_dis\">Booster pump on</button>";
+  } else {
+    Value += "<a><button class=\"button btn_off btn_dis\">Booster pump off</button>";
+  }
+  /*if (VFD_30_HP_Pump == 1) {
     Value += "<a><button class=\"button btn_on btn_dis\">30HP Pump on</button>";
   } else {
     Value += "<a><button class=\"button btn_off btn_dis\">30HP Pump off</button>";
@@ -1526,36 +1492,24 @@ String Lower() {
     Value += "<a><button class=\"button btn_on btn_dis\">60ft Conveyor on</button>";
   } else {
     Value += "<a><button class=\"button btn_off btn_dis\">60ft Conveyor off</button>";
-  }
-  if (VFD_Booster_Pump_15HP == 1) {
-    Value += "<a><button class=\"button btn_on btn_dis\">Booster pump on</button>";
-  } else {
-    Value += "<a><button class=\"button btn_off btn_dis\">Booster pump off</button>";
-  }
+  }*/
+  
   return Value;
 }  // end of Lower function
 
 String Upper() {
   Serial.print("Valve_Problem ");
   Serial.print(Valve_Problem);
-  Serial.print(" VFD1_Problem ");
-  Serial.print(VFD1_Problem);
-  Serial.print(" VFD2_Problem ");
-  Serial.println(VFD2_Problem);
-  String Value = ("<h1>Riven Control System</h1>");
-  if ((VFD2_Problem + VFD1_Problem + Valve_Problem) > 0) {
-    // one or more of the modules isn't communicating
+  
+  String Value = ("<h1>Maria Plant Control</h1>");
+  if (Valve_Problem > 0) {
+    // the remote module isn't communicating
     switch (Plant_Run_State) {
       case Waiting_for_command:
         if (Valve_Problem > 0) {
           Value += "<p>Check the Valve control module before starting</p>";
         }
-        if (VFD1_Problem > 0) {
-          Value += "<p>Check the 1st relay control module before starting</p>";
-        }
-        if (VFD2_Problem > 0) {
-          Value += "<p>Check the 2nd relay control module before starting</p>";
-        }
+        
         //client.println("</div>");
         delay(100);  //wait for someone to press start button, stop button
                      // or for the plant to finish initializing or stopping
@@ -1563,12 +1517,6 @@ String Upper() {
       case Initialize_plant:
         if (Valve_Problem > 0) {
           Value += "<p>Check the Valve control module before starting</p>";
-        }
-        if (VFD1_Problem > 0) {
-          Value += "<p>Check the 1st relay control module before starting</p>";
-        }
-        if (VFD2_Problem > 0) {
-          Value += "<p>Check the 2nd relay control module before starting</p>";
         }
         // client.println("</div>");
         break;
@@ -1579,35 +1527,17 @@ String Upper() {
         if (Valve_Problem > 0) {
           Value += "<p>Check the Valve control module before starting</p>";
         }
-        if (VFD1_Problem > 0) {
-          Value += "<p>Check the 1st relay control module before starting</p>";
-        }
-        if (VFD2_Problem > 0) {
-          Value += "<p>Check the 2nd relay control module before starting</p>";
-        }
         //client.println("</div>");
         break;
       case Plant_stopping:
         if (Valve_Problem > 0) {
           Value += "<p>Check the Valve control module before starting</p>";
         }
-        if (VFD1_Problem > 0) {
-          Value += "<p>Check the 1st relay control module before starting</p>";
-        }
-        if (VFD2_Problem > 0) {
-          Value += "<p>Check the 2nd relay control module before starting</p>";
-        }
         //client.println("</div>");
         break;
       case Plant_stopped:
         if (Valve_Problem > 0) {
           Value += "<p>Check the Valve control module before starting</p>";
-        }
-        if (VFD1_Problem > 0) {
-          Value += "<p>Check the 1st relay control module before starting</p>";
-        }
-        if (VFD2_Problem > 0) {
-          Value += "<p>Check the 2nd relay control module before starting</p>";
         }
         Value += "<p><a href=\"/ReStart\"><button class=\"button btn_on\">Try Again</button></a>";
         //client.println("</div>");
@@ -1656,7 +1586,7 @@ String Upper() {
 }
 String Stop_Buttons() {
   String Value = ("<p>Emergency Stop Buttons</p>");
-  if (VFD_Hopper == 1) {
+  /*if (VFD_Hopper == 1) {
     Value += "<p><a href=\"/Hopper_stop\"><button class=\"button btn_on btn_Med\">Hopper Stop</button>";
   } else {
     Value += "<a href=\"/Hopper_start\"><button class=\"button btn_off btn_Med\">Hopper Start</button>";
@@ -1680,7 +1610,7 @@ String Stop_Buttons() {
     Value += "<a href=\"/Sluice_stop\"><button class=\"button btn_on btn_Med\">Conveyor Sluice Stop</button>";
   } else {
     Value += "<a href=\"/Sluice_start\"><button class=\"button btn_off btn_Med\">Conveyor Sluice Start</button>";
-  }
+  }*/
   return Value;
 }
 void Update_Valve_Module(int Cycle_Type) {
@@ -1880,40 +1810,26 @@ void Update_VFD1_Module(int Cycle_Type) {
 
 void Update_VFD2_Module() {
 
-  Data_3.VFD2_relay_states &= 0b1111111011111111;
-  Data_3.VFD2_relay_states |= VFD_Hopper << 8;
-  Data_3.VFD2_relay_states &= 0b1111110111111111;
-  Data_3.VFD2_relay_states |= VFD_Conveyor_Sluice << 9;
-  Data_3.VFD2_relay_states &= 0b1111101111111111;
-  Data_3.VFD2_relay_states |= VFD_Tails_Conveyor << 10;
-  Data_3.VFD2_relay_states &= 0b1111011111111111;
-  Data_3.VFD2_relay_states |= VFD_Screen << 11;
-  Data_3.VFD2_relay_states &= 0b1110111111111111;
-  Data_3.VFD2_relay_states |= VFD_Primary_VT40 << 12;
-  Data_3.VFD2_relay_states &= 0b1101111111111111;
-  Data_3.VFD2_relay_states |= VFD_Secondary_VT40 << 13;
-  Data_3.VFD2_relay_states &= 0b1011111111111111;
-  Data_3.VFD2_relay_states |= VFD_Submersible_Pump << 14;
-  Data_3.VFD2_relay_states &= 0b0111111111111111;
-  Data_3.VFD2_relay_states |= VFD_Booster_Pump_15HP << 15;
-
-  Data_3.VFD2_relay_states &= 0b1111111111111110;
-  Data_3.VFD2_relay_states |= VFD_20HP_Transfer_Pump;
-  Data_3.VFD2_relay_states &= 0b1111111111111101;
-  Data_3.VFD2_relay_states |= VFD_60_HP_Pump << 1;
-  Data_3.VFD2_relay_states &= 0b1111111111111011;
-  Data_3.VFD2_relay_states |= VFD_30_HP_Pump << 2;
-  Data_3.VFD2_relay_states &= 0b1111111111110111;
-  Data_3.VFD2_relay_states |= VFD_50_HP_Pump << 3;
-  Data_3.VFD2_relay_states &= 0b1111111111101111;
-  Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor << 4;
+  Data_3.VFD2_relay_states &= 0b1111111011111111; Data_3.VFD2_relay_states |= VFD_Starboard_Sump<<8;
+  Data_3.VFD2_relay_states &= 0b1111110111111111; Data_3.VFD2_relay_states |= VFD_Port_Sump<<9;
+  Data_3.VFD2_relay_states &= 0b1111101111111111; Data_3.VFD2_relay_states |= VFD_Starboard_Screen<<10;
+  Data_3.VFD2_relay_states &= 0b1111011111111111; Data_3.VFD2_relay_states |= VFD_Port_Screen<<11;
+  Data_3.VFD2_relay_states &= 0b1110111111111111; Data_3.VFD2_relay_states |= VFD_3_Tsurumi<<12;
+  Data_3.VFD2_relay_states &= 0b1101111111111111; Data_3.VFD2_relay_states |= VFD_2_Tsurumi<<13;
+  Data_3.VFD2_relay_states &= 0b1011111111111111; Data_3.VFD2_relay_states |= VFD_Concentrator_Tails_Pump<<14;
+  Data_3.VFD2_relay_states &= 0b0111111111111111; Data_3.VFD2_relay_states |= VFD_Booster_Pump_15HP<<15;
+  
+  //Data_3.VFD2_relay_states &= 0b1111111111111110; Data_3.VFD2_relay_states |= VFD_Sluice_Pumps;
+  Data_3.VFD2_relay_states &= 0b1111111111111101; Data_3.VFD2_relay_states |= VFD_Table<<1;
+  Data_3.VFD2_relay_states &= 0b1111111111111011; Data_3.VFD2_relay_states |= VFD_Overall_Tails_Pump<<2;
+  //Data_3.VFD2_relay_states &= 0b1111111111110111; Data_3.VFD2_relay_states |= VFD_50_HP_Pump<<3;
+  //Data_3.VFD2_relay_states &= 0b1111111111101111; Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor<<4;
   //Data_3.VFD2_relay_states &= 0b1111111111011111; Data_3.VFD2_relay_states |= VFD_60_ft_Conveyor<<5;
   //Data_3.VFD2_relay_states &= 0b1111111110111111; Data_3.VFD2_relay_states |= VFD_Submersible_Pump<<6;
 
-  //pf575_write(Data_3.VFD2_relay_states); // Writes to one of the relay cards attached through the I2C bus
   BitInvert = Data_3.VFD2_relay_states ^ Invertword;
-  Wire.beginTransmission(i2c_Relay2);
-  Wire.write(lowByte(BitInvert));
-  Wire.write(highByte(BitInvert));
-  Wire.endTransmission();
+    Wire.beginTransmission(i2c_Relay2);
+    Wire.write(lowByte(BitInvert));
+    Wire.write(highByte(BitInvert));
+    Wire.endTransmission();
 }
