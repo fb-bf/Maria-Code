@@ -155,6 +155,8 @@ int HoseGuideClipIn = -2047;
 int HoseGuidedb = 0;
 
 int32_t dragflowPosition = 0;
+int speedlimit = 50;
+int Newspeedlimit = 50;
 float dragflowheight = 0;
 int32_t dragflowVelocity = 0;
 int32_t dragflowLastPosition = 0;
@@ -306,7 +308,7 @@ void ControlLoop() {
 }
 void BoomControl(){
   //LoopCounter++;
-  // counts per foot at 90 ft radius will be 1131
+  // counts per foot at 90 ft radius will be 1131, counts per degree is 1777
   // Boom errors could be 20,000 or larger!!
   // If BoomG = 3, BoomControlCommand will be 60,000, and we need values of +/- 50
   // If we want max speed with a 10 foot error, then Gain = 1/(10*1131/5000) = .442
@@ -325,7 +327,7 @@ void BoomControl(){
    else{
     boomServoOutput = 5000;
    }
-   if(boomServoOutput != LastboomServoOutput){
+   if(boomServoOutput != LastboomServoOutput){  //!= means not equal to
         //pwm1.setPWM(0,1,boomServoOutput);
         dac1.setDACOutVoltage(boomServoOutput, 0);
      }  
@@ -335,10 +337,10 @@ void BoomControl(){
    
 }
 void TrolleyControl(){
-  // Trolley motion will be 7639 counts per ft, if we use SingleEdge with the encoder.
+  // Trolley motion will be 15279 counts per ft, if we use Halfquad with the encoder.
   // If we want max speed with a 10 foot error, then Gain = 1/(10*7639/2048) = .0268
   // We'll then clip the max control effort to 2048 for moves greater than 10 ft.
-  // Velocity at 1ft/sec will be 7639/50 = 152 if interupt time is 20 ms.
+  // Velocity at 1ft/sec will be 15279/50 = 304 if interupt time is 20 ms.
   // Trolley error is defined as positive when desired position is farther out than current position
   // Trolley position is in feet for this test!!!
   trolleyCurrentPosition = (int32_t)trolleyencoder.getCount();
@@ -390,7 +392,7 @@ void DragflowControl(){
    DragflowError = dragflowPosition - dragflowCurrentPosition;
    if(abs(DragflowError) > Dragflowdb){
    dragflowVelocity =  dragflowLastPosition - dragflowCurrentPosition;
-   if(abs(dragflowVelocity) > Dfencoderperft/50) RunLoop = false; //Stop the loop if this is going too fast
+   if(abs(dragflowVelocity) > Dfencoderperft/speedlimit) RunLoop = false; //Stop the loop if this is going too fast
    dragflowControlCommand = (float)(DragflowError * DragflowG) - (float)(dragflowVelocity * DragflowD);
    if(dragflowControlCommand > DragflowClipUp) dragflowControlCommand = DragflowClipUp;
    if(dragflowControlCommand < DragflowClipDown) dragflowControlCommand = DragflowClipDown;
@@ -1148,13 +1150,13 @@ void Deal_With_client() {
               dragflowencoder.setCount(0);
             }
             else if (header.indexOf("GET /Link_Winches") >= 0){
-            Linkwinches = true;
-            //goto END;   //Don't need to refresh the entire page
+              if (Linkwinches == true) {
+                Linkwinches = !Linkwinches;
+              }else{
+              Linkwinches = !Linkwinches; // Make it true
+              }
             }
-            else if (header.indexOf("GET /UnLink_Winches") >= 0){
-            Linkwinches = false;
-            //goto END;   //Don't need to refresh the entire page
-            }
+            
             if (header.indexOf("GET /BoomControl") >= 0) {
               if (BoomManualControl == true) {
                 dac1.setDACOutVoltage(500, 0); //set to below 15% of 10 volts to goto manual control
@@ -1271,10 +1273,10 @@ void Deal_With_client() {
             /*Form_Content = HoseReelForm();
             client.println(Form_Content);
             Form_Content = HoseGuideForm();
-            client.println(Form_Content);
+            client.println(Form_Content);*/
             
             Form_Content = ExtraVariablesForm();
-            client.println(Form_Content);*/
+            client.println(Form_Content);
 
             
             client.println("</body></html>");
@@ -1431,8 +1433,9 @@ void Deal_With_client() {
  }
  String ExtraVariablesForm() {
   //Serial.println("Form ExtraVariablesForm ");
-  char buffer1[10];
-  sprintf(buffer1,"%.3f",Hose2drag_ratio);
+  //char buffer1[10];
+  //sprintf(buffer1,"%.3f",speedlimit);
+  Newspeedlimit = speedlimit;
   char buffer2[10];
   sprintf(buffer2,"%.3f",Boomanglecomp);
   Newlooptimer = looptimer;
@@ -1441,8 +1444,8 @@ void Deal_With_client() {
   Value += ("<form action='/form/submit' method='get' <Label> </Label>");
   //Value += ("<Label> </Label>");
       
-      Value += ("Hose_reel_to_dragflow_ratio:<input type='text' value="+String(buffer1)+" name='New_Hose2drag_ration'/>");
-      //Value += ("Hose:<input type='text' value="+String(buffer1)+" name='New_Hose2drag_ration'/>");
+      //Value += ("Hose_reel_to_dragflow_ratio:<input type='text' value="+String(buffer1)+" name='New_Hose2drag_ration'/>");
+      Value += ("SpeedLimit:<input type='text' value="+String(Newspeedlimit)+" name='New_speedlimit'/>");
       Value += ("Boom angle comp:<input type='text' value="+String(buffer2)+" name='New_Boomanglecomp'/>");
       Value += ("looptimer Value:<input type='text' value="+String(Newlooptimer)+" name='New_looptimer'/>");
       Value += ("<input type='submit' value='Submit' />");
@@ -1482,22 +1485,26 @@ String Lower() {
   Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a></p>");
   Value += ("<p><a href=\"/Zero_Trolley_Enc\"><button class=\"button btn_off\">Zero Trolley</button></a>");
   Value += ("<a href=\"/Zero_Drag_Enc\"><button class=\"button btn_off\">Zero Drag</button></a>");
-  Value += ("<a href=\"/Link_Winches\"><button class=\"button btn_off\">Link Winches</button></a>");
-  Value += ("<a href=\"/UnLink_Winches\"><button class=\"button btn_off\">UnLink Winches</button></a>");
+  
+  if (Linkwinches == false) {
+    Value += "<a href=\"/Link_Winches\"><button class=\"button btn_on\">Winches Unlinked</button></a>";
+  } else {
+    Value += "<a href=\"/Link_Winches\"><button class=\"button btn_on\">Winches linked</button></a>";
+  }
   if (BoomManualControl == false) {
     Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom Servo</button></a>";
   } else {
-    Value += "<a href=\"/BoomControl\"><button class=\"button btn_off\">Boom Manual</button></a>";
+    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom Manual</button></a>";
   }
   if (TrolleyManualControl == false) {
     Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley Servo</button></a>";
   } else {
-    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_off\">Trolley Manual</button></a>";
+    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley Manual</button></a>";
   }
   if (DragManualControl == false) {
     Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag Servo</button></a></p>";
   } else {
-    Value += "<a href=\"/DragControl\"><button class=\"button btn_off\">Drag Manual</button></a></p>";
+    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag Manual</button></a></p>";
   }
   return Value; 
 } // end of Lower function
