@@ -199,11 +199,11 @@ typedef struct Test_str {
 Test_str Trigger_State;
 String Limitswitchstatus = "Okay";
 byte New_Message = 0;
-bool BoomManualControl = false;
+bool BoomManualControl = true;
 bool SkipBoomLoop = false;
-bool TrolleyManualControl = false;
+bool TrolleyManualControl = true;
 bool SkipTrolleyLoop = false;
-bool DragManualControl = false;
+bool DragManualControl = true;
 bool SkipDragLoop = false;
 bool transition = false; //used for switching to linked dragflow and trolley position
 bool Hose_reel_guide_right_switch = false; //#10
@@ -312,7 +312,7 @@ void ControlLoop() {
     HoseReelControl();
     HoseGuideControl();
     //HoseReelOverride(); // This checks to see if the hose reel is keeping the proper amount of hose out
-    }
+  }
     else{ // shut down all of the systems untill this is figured out
      boomServoOutput = 5000;
      dac1.setDACOutVoltage(boomServoOutput, 0);
@@ -1408,7 +1408,7 @@ void Deal_With_client() {
   sprintf(buffer2,"%.3f",DragflowD); // do this to get 3 decimal places displayed
   String Value ="";
   Value +=("<div>");
-  Value +=("<p>Current Dragflow Height: "+String(dragflowheight)+" Current Gain Value: ");
+  Value +=("<p>Current Dragflow Height: "+String(dragflowCurrentPosition)+" Current Gain Value: ");
   Value +=(""+String(buffer1)+" Dragflow Diff: "+String(buffer2)+" Clip Up: ");
   Value +=(""+String(DragflowClipUp)+" Clip Down: "+String(DragflowClipDown)+"</p>");
   Value += ("<form action='/form/submit' method='get' <Label> </Label>");
@@ -1523,7 +1523,7 @@ String Lower() {
   Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a></p>");
   Value += ("<p><a href=\"/Zero_Trolley_Enc\"><button class=\"button btn_off\">Zero Trolley</button></a>");
   Value += ("<a href=\"/Zero_Drag_Enc\"><button class=\"button btn_off\">Zero Drag</button></a>");
-   Value += ("<a href=\"/Zero_Boom_Enc\"><button class=\"button btn_off\">Zero Boom</button></a>");
+  Value += ("<a href=\"/Zero_Boom_Enc\"><button class=\"button btn_off\">Zero Boom</button></a>");
   Value += "<a href=\"/Pressure_Increase\"><button class=\"button btn_on\">Pressure Increase</button></a>";
   Value += "<a href=\"/Pressure_Decrease\"><button class=\"button btn_off\">Pressure Decrease</button></a>";
   
@@ -1532,20 +1532,20 @@ String Lower() {
   } else {
     Value += "<a href=\"/Link_Winches\"><button class=\"button btn_on\">Winches linked</button></a>";
   }
-  if (BoomManualControl == false) {
-    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom Servo</button></a>";
+  if (BoomManualControl == true) {
+    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom in Servo</button></a>";
   } else {
-    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom Manual</button></a>";
+    Value += "<a href=\"/BoomControl\"><button class=\"button btn_on\">Boom in Manual</button></a>";
   }
-  if (TrolleyManualControl == false) {
-    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley Servo</button></a>";
+  if (TrolleyManualControl == true) {
+    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley in Servo</button></a>";
   } else {
-    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley Manual</button></a>";
+    Value += "<a href=\"/TrolleyControl\"><button class=\"button btn_on\">Trolley in Manual</button></a>";
   }
-  if (DragManualControl == false) {
-    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag Servo</button></a></p>";
+  if (DragManualControl == true) {
+    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag in Servo</button></a></p>";
   } else {
-    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag Manual</button></a></p>";
+    Value += "<a href=\"/DragControl\"><button class=\"button btn_on\">Drag in Manual</button></a></p>";
   }
   return Value; 
 } // end of Lower function
