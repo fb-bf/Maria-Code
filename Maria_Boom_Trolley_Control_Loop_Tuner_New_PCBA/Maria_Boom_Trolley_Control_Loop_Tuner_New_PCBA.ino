@@ -53,6 +53,7 @@ portMUX_TYPE timer2Mux = portMUX_INITIALIZER_UNLOCKED;
 //volatile bool interruptbool1 = false;
 bool interruptbool2 = false;
 bool Linkwinches = false;
+bool PressureIncrease =false;
 volatile int interrupt1Counter = 0;
 volatile int interrupt2Counter = 0;
 //enum vtlStates {AMBER, RED, RA, GREEN}; // the states a single traffic light can be in
@@ -157,6 +158,10 @@ int HoseGuidedb = 0;
 int32_t dragflowPosition = 0;
 int speedlimit = 50;
 int Newspeedlimit = 50;
+int NewValveValue =5000;
+int ValveValue =5000;
+int Newloopdelay = 1 ;
+int loopdelay = 1 ;
 float dragflowheight = 0;
 int32_t dragflowVelocity = 0;
 int32_t dragflowLastPosition = 0;
@@ -285,9 +290,25 @@ int32_t IIRFilter(int32_t Input){
 
 void ControlLoop() {  
  if (RunLoop){ // Checks to see if the loop is disabled
-    if(!SkipBoomLoop) BoomControl(); 
-    if(!SkipTrolleyLoop) TrolleyControl();
-    if(!SkipDragLoop) DragflowControl();
+    if(SkipBoomLoop){
+      boomCurrentPosition = (int32_t)boomencoder.getCount();
+    } 
+    else{
+      BoomControl();
+    }
+    if(SkipTrolleyLoop){
+      trolleyCurrentPosition = (int32_t)trolleyencoder.getCount();
+    } 
+    else{
+      TrolleyControl();
+    }
+    if(SkipDragLoop){
+      dragflowCurrentPosition = (int32_t)dragflowencoder.getCount();
+    } 
+    else{
+      DragflowControl();
+    } 
+
     HoseReelControl();
     HoseGuideControl();
     //HoseReelOverride(); // This checks to see if the hose reel is keeping the proper amount of hose out
@@ -531,13 +552,15 @@ void parseExtraValues(){
   EqualSignLoc = header.indexOf("=");
   SpaceFollowing = header.indexOf("&",EqualSignLoc);
   returnValue = header.substring(EqualSignLoc+1,SpaceFollowing);
-  temp = returnValue.c_str();
-  extraValue1 = std::atof(temp);
+  Newspeedlimit = returnValue.toInt();
+  //temp = returnValue.c_str();
+  //extraValue1 = std::atof(temp);
   EqualSignLoc = header.indexOf("=",SpaceFollowing);
   SpaceFollowing = header.indexOf("&",EqualSignLoc);
   returnValue = header.substring(EqualSignLoc+1,SpaceFollowing);
-  temp = returnValue.c_str();
-  extraValue2 = std::atof(temp);
+  NewValveValue = returnValue.toInt();
+  //temp = returnValue.c_str();
+  //extraValue2 = std::atof(temp);
  // EqualSignLoc = header.indexOf("=",SpaceFollowing);
   //SpaceFollowing = header.indexOf("&",EqualSignLoc);
   //returnValue = header.substring(EqualSignLoc+1,SpaceFollowing);
@@ -1149,6 +1172,9 @@ void Deal_With_client() {
             else if (header.indexOf("GET /Zero_Drag_Enc") >= 0){
               dragflowencoder.setCount(0);
             }
+            else if (header.indexOf("GET /Zero_Boom_Enc") >= 0){
+              boomencoder.setCount(0);
+            }
             else if (header.indexOf("GET /Link_Winches") >= 0){
               if (Linkwinches == true) {
                 Linkwinches = !Linkwinches;
@@ -1156,38 +1182,45 @@ void Deal_With_client() {
               Linkwinches = !Linkwinches; // Make it true
               }
             }
-            
+            else if (header.indexOf("GET /Pressure_Increase") >= 0){ 
+                ValveValue = ValveValue + 500;
+                dac3.setDACOutVoltage(ValveValue, 1);
+            }
+            else if (header.indexOf("GET /Pressure_Decrease") >= 0){
+                ValveValue = ValveValue - 500;
+                dac3.setDACOutVoltage(ValveValue, 1);
+            }
             if (header.indexOf("GET /BoomControl") >= 0) {
               if (BoomManualControl == true) {
                 dac1.setDACOutVoltage(500, 0); //set to below 15% of 10 volts to goto manual control
                 SkipBoomLoop = true;
-                BoomManualControl = !BoomManualControl;
+                BoomManualControl = false;
               } else {
                 dac1.setDACOutVoltage(5000, 0); //set to home (5 volts)
                 SkipBoomLoop = false; //Turn boom loop back on
-                BoomManualControl = !BoomManualControl;
+                BoomManualControl = true;
               }
             }
             if (header.indexOf("GET /TrolleyControl") >= 0) {
-              if (BoomManualControl == true) {
+              if (TrolleyManualControl == true) {
                 dac1.setDACOutVoltage(500, 1); //set to below 15% of 10 volts to goto manual control
                 SkipTrolleyLoop = true;
-                TrolleyManualControl = !TrolleyManualControl;
+                TrolleyManualControl = false;
               } else {
                 dac1.setDACOutVoltage(5000, 1); //set to home (5 volts)
                 SkipTrolleyLoop = false; //Turn boom loop back on
-                TrolleyManualControl = !TrolleyManualControl;
+                TrolleyManualControl = true;
               }
             }
             if (header.indexOf("GET /DragControl") >= 0) {
-              if (BoomManualControl == true) {
+              if (DragManualControl == true) {
                 dac2.setDACOutVoltage(500, 0); //set to below 15% of 10 volts to goto manual control
                 SkipDragLoop = true;
-                DragManualControl = !DragManualControl;
+                DragManualControl = false;
               } else {
                 dac2.setDACOutVoltage(5000, 0); //set to home (5 volts)
                 SkipDragLoop = false; //Turn boom loop back on
-                DragManualControl = !DragManualControl;
+                DragManualControl = true;
               }
             }
             else if (header.indexOf("GET /form/submit?New_Boom_Location") >= 0) {
@@ -1241,14 +1274,16 @@ void Deal_With_client() {
               Serial.println(hoseGuidePosition);
               Serial.println(HoseGuideG);
             }
-            else if (header.indexOf("GET /form/submit?New_Hose2drag_ration") >= 0) {
+            else if (header.indexOf("GET /form/submit?New_speedlimit") >= 0) {
               Serial.println(header);
               parseExtraValues();
-              Hose2drag_ratio = extraValue1;
-              Boomanglecomp = extraValue2;
+              //Hose2drag_ratio = extraValue1;
+              speedlimit = Newspeedlimit;
+              //Boomanglecomp = extraValue2;
+              ValveValue = NewValveValue;
               looptimer = Newlooptimer;
-              Serial.println(Hose2drag_ratio);
-              Serial.println(Boomanglecomp);
+              Serial.println(Newspeedlimit);
+              Serial.println(NewValveValue);
             }
             else if (header.indexOf("GET /Refresh") >= 0){
             //Upper_Content = Upper();
@@ -1436,18 +1471,21 @@ void Deal_With_client() {
   //char buffer1[10];
   //sprintf(buffer1,"%.3f",speedlimit);
   Newspeedlimit = speedlimit;
-  char buffer2[10];
-  sprintf(buffer2,"%.3f",Boomanglecomp);
-  Newlooptimer = looptimer;
+  //char buffer2[10];
+  //sprintf(buffer2,"%.3f",Boomanglecomp);
+  //NewValveValue = ValveValue;
+  //Newlooptimer = looptimer;
   String Value ="";
   Value +=("<div>");
   Value += ("<form action='/form/submit' method='get' <Label> </Label>");
   //Value += ("<Label> </Label>");
       
       //Value += ("Hose_reel_to_dragflow_ratio:<input type='text' value="+String(buffer1)+" name='New_Hose2drag_ration'/>");
-      Value += ("SpeedLimit:<input type='text' value="+String(Newspeedlimit)+" name='New_speedlimit'/>");
-      Value += ("Boom angle comp:<input type='text' value="+String(buffer2)+" name='New_Boomanglecomp'/>");
-      Value += ("looptimer Value:<input type='text' value="+String(Newlooptimer)+" name='New_looptimer'/>");
+      Value += ("Speed_Limit:<input type='text' value="+String(speedlimit)+" name='New_speedlimit'/>");
+      Value += ("Move Valve Value:<input type='text' value="+String(ValveValue)+" name='ValveValue'/>");
+      //Value += ("Boom angle comp:<input type='text' value="+String(buffer2)+" name='New_Boomanglecomp'/>");
+      Value += ("looptimer Value:<input type='text' value="+String(looptimer)+" name='New_looptimer'/>");
+      //Value += ("loopdelay Value:<input type='text' value="+String(Newloopdelay)+" name='New_loopdelay'/>");
       Value += ("<input type='submit' value='Submit' />");
       Value += ("</form></div>");
   return Value;
@@ -1485,6 +1523,9 @@ String Lower() {
   Value += ("<a href=\"/Start_Loop\"><button class=\"button btn_off\">Start Loop</button></a></p>");
   Value += ("<p><a href=\"/Zero_Trolley_Enc\"><button class=\"button btn_off\">Zero Trolley</button></a>");
   Value += ("<a href=\"/Zero_Drag_Enc\"><button class=\"button btn_off\">Zero Drag</button></a>");
+   Value += ("<a href=\"/Zero_Boom_Enc\"><button class=\"button btn_off\">Zero Boom</button></a>");
+  Value += "<a href=\"/Pressure_Increase\"><button class=\"button btn_on\">Pressure Increase</button></a>";
+  Value += "<a href=\"/Pressure_Decrease\"><button class=\"button btn_off\">Pressure Decrease</button></a>";
   
   if (Linkwinches == false) {
     Value += "<a href=\"/Link_Winches\"><button class=\"button btn_on\">Winches Unlinked</button></a>";
