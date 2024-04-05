@@ -1177,9 +1177,9 @@ void Deal_With_client() {
             }
             else if (header.indexOf("GET /Link_Winches") >= 0){
               if (Linkwinches == true) {
-                Linkwinches = !Linkwinches;
+                Linkwinches = false;
               }else{
-              Linkwinches = !Linkwinches; // Make it true
+              Linkwinches = true; // Make it true
               }
             }
             else if (header.indexOf("GET /Pressure_Increase") >= 0){ 
