@@ -1530,11 +1530,11 @@ void Deal_With_client() {
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
   Value +=("Boom Current Location (degrees): "+String(buffer2)+"</p>");
-  Value += ("Move_To:<input type='text' value="+String(BoomLocationDeg)+" name='Move_To'/>");
+  Value += ("Move_To (degrees):<input type='text' value="+String(BoomLocationDeg)+" name='Move_To'/>");
   Value += ("<input type='submit' value='Submit' /></form></p>");
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
-  Value +=("New_Encoder_Value:<input type='text' value="+String(Bencoderperdeg)+" name='New_Encoder_Value'/>");
+  Value +=("Encoder counts per degree:<input type='text' value="+String(Bencoderperdeg)+" name='New_Encoder_Value'/>");
   Value += ("<input type='submit' value='Submit' /></form></p></div>");
 
   return Value;
@@ -1564,11 +1564,11 @@ void Deal_With_client() {
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
   Value +=("Trolley Current Location (Feet): "+String(buffer2)+"</p>");
-  Value += ("Move_To:<input type='text' value="+String(trolleyLocationft)+" name='Move_To'/>");
+  Value += ("Move_To (feet):<input type='text' value="+String(trolleyLocationft)+" name='Move_To'/>");
   Value += ("<input type='submit' value='Submit' /></form></p>");
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
-  Value +=("New_Encoder_Value:<input type='text' value="+String(Trencoderperft)+" name='New_Encoder_Value'/>");
+  Value +=("Encoder counts per foot:<input type='text' value="+String(Trencoderperft)+" name='New_Encoder_Value'/>");
   Value += ("<input type='submit' value='Submit' /></form></p></div>");
   
   return Value;
@@ -1597,11 +1597,11 @@ void Deal_With_client() {
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
   Value +=("<p>Dragflow Current Height (Feet): "+String(buffer2)+"</p>");
-  Value += ("Move_To:<input type='text' value="+String(dragflowheightft)+" name='Move_To'/>");
+  Value += ("Move_To (feet):<input type='text' value="+String(dragflowheightft)+" name='Move_To'/>");
   Value += ("<input type='submit' value='Submit' /></form></p>");
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
-  Value +=("New_Encoder_Value:<input type='text' value="+String(Dfencoderperft)+" name='New_Encoder_Value'/>");
+  Value +=("Encoder counts per foot:<input type='text' value="+String(Dfencoderperft)+" name='New_Encoder_Value'/>");
   Value += ("<input type='submit' value='Submit' /></form></p></div>");
   
   return Value;
@@ -1615,7 +1615,7 @@ void Deal_With_client() {
   //sprintf(buffer2,"%.3f",HoseReelD); // do this to get 3 decimal places displayed
   
   sprintf(buffer2,"%.1f",(hoseReelCurrentPosition * Hrencoderperft));
-  String Value ="<h2> Negative hose position requested should move real in!<h2><p>";
+  String Value ="<h2> Negative hose position requested should move reel in!</h2><p>";
   if (HosereelManualControl == true) {
     Value += "<a href=\"/HosereelControl\"><button class=\"button btn_on\">Hosereel in Servo mode</button></a>";
   } else {
@@ -1632,11 +1632,11 @@ void Deal_With_client() {
   
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
   Value +=("Hosreel Current Position (Feet): "+String(buffer2)+"</p>");
-  Value += ("Move_To:<input type='text' value="+String(hoseReelPositionft)+" name='Move_To'/>");
+  Value += ("Move_To (feet):<input type='text' value="+String(hoseReelPositionft)+" name='Move_To'/>");
   Value += ("<input type='submit' value='Submit' /></form></p>");
 
   Value += ("<p><form action='/form/submit' method='get' <Label> </Label>");
-  Value +=("New_Encoder_Value:<input type='text' value="+String(Hrencoderperft)+" name='New_Encoder_Value'/>");
+  Value +=("Encoder counts per foot of hose motion:<input type='text' value="+String(Hrencoderperft)+" name='New_Encoder_Value'/>");
   Value += ("<input type='submit' value='Submit' /></form></p></div>");
   
   return Value;
@@ -1784,7 +1784,7 @@ String Stylecode() {
     Value += ("<link rel='icon' href='data:,'>"); // here because we have now favicon icon to display
     // CSS to style the on/off buttons 
              
-    Value += ("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
+    Value += ("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; font-weight: bold; text-align: center;}");
     Value += ("input[type=text] {width: 5%; padding: 10px 5px; margin: 1px 1px; box-sizing: border-box; }");
     Value += (" div{border:2px solid red;}");
     Value += (".button { background-color: #4CAF50; border: 2px solid black; color: white; width: 10vw;");
